@@ -1,0 +1,59 @@
+{
+  "$schema": "https://raw.githubusercontent.com/stablyai/orca/main/docs/schemas/plugins/orca-plugin.v2.schema.json",
+  "manifestVersion": 2,
+  "id": "tmux-peek",
+  "name": "Tmux Peek",
+  "version": "1.0.0",
+  "description": "Watch, message and drive your Claude Code agent teammates from Orca's sidebar. macOS and Linux; needs tmux and Claude Code's tmux teammate mode.",
+  "author": {
+    "name": "Nithin Paul",
+    "url": "https://github.com/NithinPaul1360"
+  },
+  "repository": "https://github.com/NithinPaul1360/orca-plugins",
+  "homepage": "https://github.com/NithinPaul1360/orca-plugins/tree/main/plugins/tmux-peek",
+  "license": "MIT",
+  "icon": "assets/icon.png",
+  "cover": {
+    "path": "assets/cover.webp",
+    "alt": "Tmux Peek in Orca's right sidebar: four Claude Code teammates working live in a two-by-two grid, with a message bar below."
+  },
+  "screenshots": [
+    {
+      "path": "assets/screenshot-team.webp",
+      "alt": "Orca with a Claude lead chat on the left and Tmux Peek on the right: four agent teammates in a grid, one of them working."
+    },
+    {
+      "path": "assets/screenshot-maximized.webp",
+      "alt": "One teammate maximized inside the Tmux Peek panel, outlined in green because keys typed now go straight to it."
+    },
+    {
+      "path": "assets/screenshot-narrow.webp",
+      "alt": "A narrower sidebar: the four teammates redraw to fit their smaller panes."
+    }
+  ],
+  "engines": {
+    "orca": ">=1.4.248"
+  },
+  "execution": "trusted-worker",
+  "pluginApi": 1,
+  "main": "src/worker.ts",
+  "capabilities": [
+    {
+      "kind": "workspace:read"
+    },
+    {
+      "kind": "terminal:read"
+    }
+  ],
+  "contributes": {
+    "panels": [
+      {
+        "id": "tmux-peek",
+        "title": "Tmux Peek",
+        "icon": "terminal",
+        "entry": "src/panel.ts",
+        "ui": "html"
+      }
+    ]
+  }
+}

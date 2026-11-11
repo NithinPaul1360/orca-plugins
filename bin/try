@@ -1,0 +1,9 @@
+#!/bin/sh
+# Live test copy of a plugin in Orca. Saves reload in about 1 s. Ctrl-C removes the test copy.
+# First run prints an approval command when the plugin runs code; run it to approve.
+set -e
+cd "$(dirname "$0")/.."
+p="${1:?usage: bin/try <plugin>}"
+[ -f "plugins/$p/orca-plugin.json" ] || { echo "no plugin at plugins/$p" >&2; exit 1; }
+shift
+exec orca plugin dev watch "plugins/$p" --check "$@"

@@ -1,0 +1,11 @@
+#!/bin/sh
+# Install a frozen copy of a plugin from this folder (key local.<id>), so it keeps running while
+# you edit. Run again after changes to update it. Prints the approval command when one is needed.
+set -e
+cd "$(dirname "$0")/.."
+p="${1:?usage: bin/use <plugin> [--approve <fingerprint>]}"
+[ -f "plugins/$p/orca-plugin.json" ] || { echo "no plugin at plugins/$p" >&2; exit 1; }
+shift
+dir="$(pwd)/plugins/$p"
+key="local.$(python3 -c "import json;print(json.load(open('$dir/orca-plugin.json'))['id'])")"
+orca plugin install "$dir" "$@" && orca plugin enable "$key" "$@"

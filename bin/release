@@ -1,0 +1,148 @@
+#!/usr/bin/env python3
+"""Release one plugin: checks, then commit that plugin + its catalog entry, then tag.
+
+  bin/release <plugin>           checks + commit + tag, locally (nothing leaves this Mac)
+  bin/release <plugin> --push    same, then push main and the tag to GitHub (public)
+  bin/release <plugin> --check   checks only
+
+Only this script commits or pushes in this repo (see CLAUDE.md).
+"""
+import json, os, re, subprocess, sys
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+os.chdir(ROOT)
+OWNER = json.load(open("orca-catalog.json"))["owner"]  # the GitHub account that owns this repo
+REPO_URL = f"https://github.com/{OWNER}/orca-plugins.git"
+
+
+def sh(*cmd, check=True, capture=True):
+    r = subprocess.run(cmd, text=True, capture_output=capture)
+    if check and r.returncode != 0:
+        sys.exit(f"✗ {' '.join(cmd)}\n{(r.stdout or '')[-1500:]}{(r.stderr or '')[-1500:]}")
+    return r
+
+
+def orca_json(*args):
+    r = sh("orca", *args, "--json", check=False)
+    try:
+        return json.loads(r.stdout)
+    except Exception:
+        sys.exit(f"✗ orca {' '.join(args)}: {r.stdout[-800:]}{r.stderr[-800:]}")
+
+
+args = [a for a in sys.argv[1:] if not a.startswith("--")]
+flags = {a for a in sys.argv[1:] if a.startswith("--")}
+if len(args) != 1:
+    sys.exit(__doc__)
+name = args[0]
+pdir = f"plugins/{name}"
+mpath = f"{pdir}/orca-plugin.json"
+if not os.path.isfile(mpath):
+    sys.exit(f"✗ no plugin at {pdir}")
+manifest = json.load(open(mpath))
+version = manifest["version"]
+pid = f"{OWNER.lower()}.{manifest['id']}"
+
+# 1. Repo state
+branch = sh("git", "symbolic-ref", "--short", "HEAD").stdout.strip()
+if branch != "main":
+    sys.exit(f"✗ on branch {branch}; this repo only uses main")
+
+# 2. Plugin checks
+print(f"• {name} {version}")
+for field in ("license", "version", "description"):
+    if not manifest.get(field):
+        sys.exit(f"✗ orca-plugin.json needs {field}")
+if not manifest.get("cover") or not manifest.get("screenshots"):
+    sys.exit("✗ orca-plugin.json needs a cover and screenshots (assets/)")
+v = orca_json("plugin", "validate", pdir)
+if not v.get("ok"):
+    sys.exit(f"✗ validate: {json.dumps(v.get('error'), indent=1)[:1500]}")
+print("  ✓ Orca validator")
+t = orca_json("plugin", "test", pdir)
+if not t.get("ok"):
+    sys.exit(f"✗ tests failed: {json.dumps(t.get('error'), indent=1)[:800]}")
+print("  ✓ tests")
+c = orca_json("plugin", "check", pdir)
+if not c.get("ok"):
+    sys.exit(f"✗ check: {json.dumps(c.get('error') or c.get('result'), indent=1)[:1500]}")
+print("  ✓ Orca check")
+
+# 3. Private-info scan over what would be committed
+home = os.path.expanduser("~")
+patterns = [re.escape(home), r"/Users/[a-z][\w.-]+/", r"(?i)(api[_-]?key|secret|token|password)\s*[:=]\s*['\"][^'\"]{8,}",
+            r"sk-[A-Za-z0-9]{20,}", r"gh[pousr]_[A-Za-z0-9]{30,}", r"AKIA[0-9A-Z]{16}"]
+bad = []
+for base in (pdir, "orca-catalog.json", "README.md", "CLAUDE.md", "LICENSE", "kit", "bin", "tools"):
+    for dp, _, files in os.walk(base) if os.path.isdir(base) else [("", [], [base])]:
+        if "/.orca" in dp or "node_modules" in dp:
+            continue
+        for f in files:
+            path = os.path.join(dp, f) if dp else f
+            if f.startswith(".env"):
+                bad.append(f"{path}: env file")
+                continue
+            try:
+                text = open(path, encoding="utf-8").read()
+            except Exception:
+                continue
+            for pat in patterns:
+                m = re.search(pat, text)
+                if m:
+                    bad.append(f"{path}: {m.group(0)[:40]}")
+if bad:
+    sys.exit("✗ private info found:\n  " + "\n  ".join(bad))
+print("  ✓ no private paths or secrets")
+
+catalog = json.load(open("orca-catalog.json"))
+entry = next((p for p in catalog["plugins"] if p["id"] == pid), None)
+if entry and any(r["version"] == version for r in entry.get("releases", [])):
+    sys.exit(f"✗ {pid} {version} is already released; bump version in {mpath}")
+if "--check" in flags:
+    print("✓ checks pass (nothing committed)")
+    sys.exit(0)
+
+# 4. Commit the plugin alone (plus the shared repo files on first release)
+sh("git", "add", "--", pdir)
+first = sh("git", "rev-parse", "--verify", "HEAD", check=False).returncode != 0
+if first:
+    sh("git", "add", "--", "README.md", "CLAUDE.md", "LICENSE", ".gitignore", "kit", "bin", "tools", "orca-catalog.json")
+sh("git", "commit", "-m", f"{name} {version}")
+rel = orca_json("plugin", "release-entry", pdir)
+if not rel.get("ok"):
+    sys.exit(f"✗ release-entry: {json.dumps(rel.get('error'))[:800]}")
+r = rel["result"]
+release = r.get("release") or r.get("entry") or r
+path = r.get("sourcePath") or r.get("source", {}).get("path") or pdir
+if not entry:
+    entry = {"id": pid, "source": {"kind": "git", "url": REPO_URL, "ref": "main", "path": path},
+             "description": manifest["description"], "categories": r.get("categories", ["commands"]), "releases": []}
+    catalog["plugins"].append(entry)
+entry["releases"].insert(0, release)
+json.dump(catalog, open("orca-catalog.json", "w"), indent=2, ensure_ascii=False)
+open("orca-catalog.json", "a").write("\n")
+sh("git", "add", "orca-catalog.json")
+sh("git", "commit", "-m", f"catalog: {pid} {version}")
+v2 = orca_json("plugin", "validate", "orca-catalog.json")
+if not v2.get("ok"):
+    sys.exit(f"✗ catalog invalid: {json.dumps(v2.get('error'))[:800]}")
+
+# 5. Repo tag: the directory lists a repository at its newest vX.Y.Z tag.
+tags = [t for t in sh("git", "tag", "--list", "v*").stdout.split() if re.fullmatch(r"v\d+\.\d+\.\d+", t)]
+if tags:
+    a, b, cc = max(tuple(map(int, t[1:].split("."))) for t in tags)
+    tag = f"v{a}.{b}.{cc + 1}"
+else:
+    tag = "v1.0.0"
+sh("git", "tag", "-a", tag, "-m", f"{name} {version}")
+print(f"✓ committed {name} {version} and its catalog entry; tagged {tag} (local)")
+
+if "--push" in flags:
+    if not sh("git", "remote", check=False).stdout.strip():
+        sys.exit("✗ no GitHub remote yet; create the repo first (see CLAUDE.md)")
+    sh("git", "push", "origin", "main", capture=False)
+    sh("git", "push", "origin", tag, capture=False)
+    sh("gh", "repo", "edit", f"{OWNER}/orca-plugins", "--add-topic", "orca-plugin", check=False)
+    print(f"✓ pushed. Status: https://onorca.dev/plugins/{OWNER}/orca-plugins")
+else:
+    print("  nothing pushed. To publish: bin/release <plugin> --push (after the GitHub repo exists)")
