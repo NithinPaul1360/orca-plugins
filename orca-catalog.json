@@ -18,6 +18,63 @@
       ],
       "releases": [
         {
+          "version": "1.1.0",
+          "commit": "b4c4c5b9455197392d982d1ba9fa17e30ef30ebc",
+          "contentHash": "a67ffc1534d109b88aa62b5b58d5649ad4bf89583fff7b83537e4030ea5f3c5b",
+          "execution": "trusted-worker",
+          "minimumOrca": "1.4.248",
+          "name": "Tmux Subagent Viewer",
+          "contributes": [
+            {
+              "kind": "panels",
+              "name": "Tmux Subagent Viewer"
+            }
+          ],
+          "capabilities": [
+            "workspace:read",
+            "terminal:read"
+          ],
+          "images": {
+            "icon": {
+              "path": "plugins/tmux-subagent-viewer/assets/icon.png",
+              "alt": "Tmux Subagent Viewer",
+              "sha256": "2d4293ee6cdb916c72a0ca650613d5a15dd3db15797d8efb94c0ea38ea17dc0b",
+              "width": 256,
+              "height": 256
+            },
+            "cover": {
+              "path": "plugins/tmux-subagent-viewer/assets/cover.webp",
+              "alt": "Tmux Subagent Viewer in Orca's right sidebar: four Claude Code subagents working live in a two-by-two grid, with a message bar below.",
+              "sha256": "74e6d7369e4df0aae0fb8a6ccb49de9e4a77e9187fd3dfd7d84ffcef6f000dfe",
+              "width": 1600,
+              "height": 1000
+            },
+            "screenshots": [
+              {
+                "path": "plugins/tmux-subagent-viewer/assets/screenshot-team.webp",
+                "alt": "Orca with a Claude lead chat on the left and Tmux Subagent Viewer on the right: four subagents in a grid, one of them working.",
+                "sha256": "6645dbb9af160724a2b3eb58a6ddea977519b4987a713b2514aa77e4ee1ab8b9",
+                "width": 2560,
+                "height": 1600
+              },
+              {
+                "path": "plugins/tmux-subagent-viewer/assets/screenshot-maximized.webp",
+                "alt": "One subagent maximized inside the Tmux Subagent Viewer panel, outlined in green because keys typed now go straight to it.",
+                "sha256": "3f05225349619516a002de24dc3a4115896c7dcb5d2bf032b32575f9e7d24566",
+                "width": 2560,
+                "height": 1600
+              },
+              {
+                "path": "plugins/tmux-subagent-viewer/assets/screenshot-narrow.webp",
+                "alt": "A narrower sidebar: the four subagents redraw to fit their smaller panes.",
+                "sha256": "3dd3b8757224b63cbf42d4ae5a70561cc8da5792eb7907a3d69bbe493bd2f396",
+                "width": 2560,
+                "height": 1600
+              }
+            ]
+          }
+        },
+        {
           "version": "1.0.0",
           "commit": "532e9eab1ffba7f39ee63f4f01b4d319b2f2218b",
           "contentHash": "c57e8e96984ae3e4e6d0632cecb9dfa3c6c5f52f1b6e79f39e0ca443a9d1616b",
