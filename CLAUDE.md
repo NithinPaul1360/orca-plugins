@@ -40,11 +40,11 @@ before release, a `cover` (16:10, at least 800×500) and `screenshots` (at least
 
 Orca's limits worth knowing (read from Orca 1.4.253's code): a panel may make 120 requests to its
 worker per 10 s, and pushed panel messages share that cap and are dropped past it. Panels have no
-network. See `plugins/tmux-subagent-viewer/README.md` for how it stays inside the cap.
+network. See `plugins/claude-subagent-viewer/README.md` for how it stays inside the cap.
 
 ## Images
 
-`tools/make-subagent-viewer-assets.py <captures-dir>` builds Tmux Subagent Viewer's cover and screenshots from three
+`tools/make-claude-subagent-viewer-assets.py <captures-dir>` builds Claude Subagent Viewer's cover and screenshots from three
 full-resolution Orca window captures named `full-grid.png`, `full-max.png` and `full-narrow.png`
 (macOS: `screencapture -o -l <Orca window id>`). The crop boxes fit a 3024×1898 window with the
 project list open; adjust `CROP` and `PANEL` for other captures.

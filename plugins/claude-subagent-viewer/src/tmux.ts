@@ -22,7 +22,7 @@ export function findSockets(lines: string[]): string[] {
 // Known install places first (Orca's worker may not have the shell's PATH), then PATH.
 const TMUX = ['/opt/homebrew/bin/tmux', '/usr/local/bin/tmux', '/usr/bin/tmux', '/bin/tmux', '/snap/bin/tmux'].find((p) => existsSync(p)) ?? 'tmux'
 
-/** Whether this machine can run Tmux Subagent Viewer: tmux has no native Windows build. */
+/** Whether this machine can run Claude Subagent Viewer: tmux has no native Windows build. */
 export async function setupState(): Promise<'ok' | 'windows' | 'no-tmux'> {
   if (process.platform === 'win32') return 'windows'
   return (await tmux(['-V'])).ok ? 'ok' : 'no-tmux'

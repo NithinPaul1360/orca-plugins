@@ -1,9 +1,9 @@
 import os, sys
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
-# usage: tools/make-subagent-viewer-assets.py <dir with full-grid.png, full-max.png, full-narrow.png>
-SRC = sys.argv[1] if len(sys.argv) > 1 else sys.exit(__doc__ or 'usage: make-subagent-viewer-assets.py <captures-dir>')
-OUT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'plugins', 'tmux-subagent-viewer', 'assets')
+# usage: tools/make-claude-subagent-viewer-assets.py <dir with full-grid.png, full-max.png, full-narrow.png>
+SRC = sys.argv[1] if len(sys.argv) > 1 else sys.exit(__doc__ or 'usage: make-claude-subagent-viewer-assets.py <captures-dir>')
+OUT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'plugins', 'claude-subagent-viewer', 'assets')
 SF = next((f for f in ['/System/Library/Fonts/SFNS.ttf', '/usr/share/fonts/truetype/inter/Inter.ttf'] if os.path.exists(f)), None)
 CROP = (442, 0, None, 1852)      # drop the project list (left) and the status bar (bottom)
 PANEL = (1588, 80, 3024, 1852)   # the right sidebar, for the cover
@@ -80,8 +80,8 @@ pw = int(panel.size[0] * ph / panel.size[1])
 panel = panel.resize((pw, ph), Image.LANCZOS)
 px = W - pw - 70
 shadowed(c, panel, (px, 60), r=22, blur=34)
-d.text((86, 250), 'Tmux Subagent', font=font(84, 700), fill=(244, 247, 250))
-d.text((86, 345), 'Viewer', font=font(84, 700), fill=(244, 247, 250))
+d.text((86, 250), 'Claude Subagent', font=font(80, 700), fill=(244, 247, 250))
+d.text((86, 345), 'Viewer', font=font(80, 700), fill=(244, 247, 250))
 lines = ['See, message and drive', 'your Claude Code subagents', 'from Orca’s sidebar.']
 for i, t in enumerate(lines):
     d.text((90, 470 + i*50), t, font=font(36, 400), fill=(160, 176, 194))

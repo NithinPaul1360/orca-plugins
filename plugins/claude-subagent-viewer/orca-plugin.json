@@ -1,30 +1,30 @@
 {
   "$schema": "https://raw.githubusercontent.com/stablyai/orca/main/docs/schemas/plugins/orca-plugin.v2.schema.json",
   "manifestVersion": 2,
-  "id": "tmux-subagent-viewer",
-  "name": "Tmux Subagent Viewer",
-  "version": "1.2.0",
+  "id": "claude-subagent-viewer",
+  "name": "Claude Subagent Viewer",
+  "version": "1.3.0",
   "description": "See, message and drive your Claude Code subagents from Orca's sidebar. macOS and Linux; needs tmux and Claude Code's tmux teammate mode.",
   "author": {
     "name": "Nithin Paul",
     "url": "https://github.com/NithinPaul1360"
   },
   "repository": "https://github.com/NithinPaul1360/orca-plugins",
-  "homepage": "https://github.com/NithinPaul1360/orca-plugins/tree/main/plugins/tmux-subagent-viewer",
+  "homepage": "https://github.com/NithinPaul1360/orca-plugins/tree/main/plugins/claude-subagent-viewer",
   "license": "MIT",
   "icon": "assets/icon.png",
   "cover": {
     "path": "assets/cover.webp",
-    "alt": "Tmux Subagent Viewer in Orca's right sidebar: four Claude Code subagents working live in a two-by-two grid, with a message bar below."
+    "alt": "Claude Subagent Viewer in Orca's right sidebar: four Claude Code subagents working live in a two-by-two grid, with a message bar below."
   },
   "screenshots": [
     {
       "path": "assets/screenshot-team.webp",
-      "alt": "Orca with a Claude lead chat on the left and Tmux Subagent Viewer on the right: four subagents in a grid, one of them working."
+      "alt": "Orca with a Claude lead chat on the left and Claude Subagent Viewer on the right: four subagents in a grid, one of them working."
     },
     {
       "path": "assets/screenshot-maximized.webp",
-      "alt": "One subagent maximized inside the Tmux Subagent Viewer panel, outlined in green because keys typed now go straight to it."
+      "alt": "One subagent maximized inside the Claude Subagent Viewer panel, outlined in green because keys typed now go straight to it."
     },
     {
       "path": "assets/screenshot-narrow.webp",
@@ -51,8 +51,8 @@
   "contributes": {
     "panels": [
       {
-        "id": "tmux-subagent-viewer",
-        "title": "Tmux Subagent Viewer",
+        "id": "claude-subagent-viewer",
+        "title": "Claude Subagent Viewer",
         "icon": "terminal",
         "entry": "src/panel.ts",
         "ui": "html"

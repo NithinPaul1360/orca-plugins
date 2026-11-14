@@ -126,11 +126,11 @@ async function loadList() {
   $<HTMLButtonElement>('lead').disabled = !current()
   if (res.setup === 'windows') {
     pick.innerHTML = '<option>Not available on Windows</option>'
-    return empty('Tmux Subagent Viewer needs tmux', 'Claude Code shows subagents in tmux, which does not run on Windows. Use Orca on macOS or Linux.')
+    return empty('Claude Subagent Viewer needs tmux', 'Claude Code shows subagents in tmux, which does not run on Windows. Use Orca on macOS or Linux.')
   }
   if (res.setup === 'no-tmux') {
     pick.innerHTML = '<option>tmux not found</option>'
-    return empty('Install tmux first', 'Tmux Subagent Viewer could not find <code>tmux</code>. Install it (macOS: <code>brew install tmux</code>), then press ↻.')
+    return empty('Install tmux first', 'Claude Subagent Viewer could not find <code>tmux</code>. Install it (macOS: <code>brew install tmux</code>), then press ↻.')
   }
   if (!items.length)
     empty(

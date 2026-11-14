@@ -1,12 +1,12 @@
-# Tmux Subagent Viewer
+# Claude Subagent Viewer
 
 See, message and drive your Claude Code subagents from Orca's right sidebar.
 **macOS and Linux · needs tmux and Claude Code's tmux teammate mode** ([setup](#requirements)).
 
-![Tmux Subagent Viewer showing four subagents](assets/screenshot-team.webp)
+![Claude Subagent Viewer showing four subagents](assets/screenshot-team.webp)
 
 When a Claude Code lead starts an [agent team](https://docs.claude.com/en/docs/claude-code) in tmux mode, it pins a line like
-`View teammates: tmux -L claude-swarm-12345 a` in the chat. Tmux Subagent Viewer finds those lines in the
+`View teammates: tmux -L claude-swarm-12345 a` in the chat. Claude Subagent Viewer finds those lines in the
 workspace you have open and shows every subagent live, without leaving Orca.
 
 ## What you can do
@@ -31,11 +31,11 @@ Panes are resized in tmux to fit the panel, so each agent draws to its real size
 
 ## Requirements
 
-> **macOS and Linux only.** Tmux Subagent Viewer reads Claude Code's tmux windows, and tmux does not run on
+> **macOS and Linux only.** Claude Subagent Viewer reads Claude Code's tmux windows, and tmux does not run on
 > Windows. On Windows the panel says so and shows nothing else.
 
 1. **Orca 1.4.248 or newer.**
-2. **tmux**: `brew install tmux` on macOS, your package manager on Linux. Tmux Subagent Viewer looks in
+2. **tmux**: `brew install tmux` on macOS, your package manager on Linux. Claude Subagent Viewer looks in
    `/opt/homebrew/bin`, `/usr/local/bin`, `/usr/bin`, `/bin` and `/snap/bin`, then your `PATH`.
 3. **Claude Code agent teams, shown in tmux.** Subagents only get a tmux window when Claude Code
    is told to use one. In `~/.claude/settings.json`:
@@ -48,9 +48,9 @@ Panes are resized in tmux to fit the panel, so each agent draws to its real size
    ```
 
    Then ask a Claude chat in Orca to start an agent team. When the chat pins
-   `View teammates: tmux -L … a`, the team appears in Tmux Subagent Viewer's dropdown.
+   `View teammates: tmux -L … a`, the team appears in Claude Subagent Viewer's dropdown.
 
-Tmux Subagent Viewer works with local workspaces. Teams running on an SSH host are not shown yet.
+Claude Subagent Viewer works with local workspaces. Teams running on an SSH host are not shown yet.
 
 Tested on macOS with Orca 1.4.253 and Claude Code 2.1.322. Linux is expected to work but is untested.
 
@@ -64,7 +64,7 @@ It sends nothing anywhere else.
 
 ## How it stays smooth
 
-Orca lets a panel make 120 requests to its background process per 10 seconds. Tmux Subagent Viewer's worker
+Orca lets a panel make 120 requests to its background process per 10 seconds. Claude Subagent Viewer's worker
 watches tmux itself and pushes a new screen only when one changes; key presses go in small batches,
 one at a time.
 
