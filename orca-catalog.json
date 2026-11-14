@@ -3,5 +3,79 @@
   "catalogVersion": 2,
   "name": "Nithin's Orca plugins",
   "owner": "NithinPaul1360",
-  "plugins": []
+  "plugins": [
+    {
+      "id": "nithinpaul1360.claude-subagent-viewer",
+      "source": {
+        "kind": "git",
+        "url": "https://github.com/NithinPaul1360/orca-plugins.git",
+        "ref": "main",
+        "path": "plugins/claude-subagent-viewer"
+      },
+      "description": "See, message and drive your Claude Code subagents from Orca's sidebar. macOS and Linux; needs tmux and Claude Code's tmux teammate mode.",
+      "categories": [
+        "commands"
+      ],
+      "releases": [
+        {
+          "version": "1.3.0",
+          "commit": "573cb36de6a9d36c2e38d79043e160f2adea5764",
+          "contentHash": "13f610050fd49353f05d7891e6343bc764abbbbb0c37e35fb16180e1a263621d",
+          "execution": "trusted-worker",
+          "minimumOrca": "1.4.248",
+          "name": "Claude Subagent Viewer",
+          "contributes": [
+            {
+              "kind": "panels",
+              "name": "Claude Subagent Viewer"
+            }
+          ],
+          "capabilities": [
+            "workspace:read",
+            "terminal:read",
+            "terminal:send"
+          ],
+          "images": {
+            "icon": {
+              "path": "plugins/claude-subagent-viewer/assets/icon.png",
+              "alt": "Claude Subagent Viewer",
+              "sha256": "2d4293ee6cdb916c72a0ca650613d5a15dd3db15797d8efb94c0ea38ea17dc0b",
+              "width": 256,
+              "height": 256
+            },
+            "cover": {
+              "path": "plugins/claude-subagent-viewer/assets/cover.webp",
+              "alt": "Claude Subagent Viewer in Orca's right sidebar: four Claude Code subagents working live in a two-by-two grid, with a message bar below.",
+              "sha256": "d05c2d8e44975823dda16497fc6e3dc72075d77e5e2a96533822d24757e4404f",
+              "width": 1600,
+              "height": 1000
+            },
+            "screenshots": [
+              {
+                "path": "plugins/claude-subagent-viewer/assets/screenshot-team.webp",
+                "alt": "Orca with a Claude lead chat on the left and Claude Subagent Viewer on the right: four subagents in a grid, one of them working.",
+                "sha256": "6645dbb9af160724a2b3eb58a6ddea977519b4987a713b2514aa77e4ee1ab8b9",
+                "width": 2560,
+                "height": 1600
+              },
+              {
+                "path": "plugins/claude-subagent-viewer/assets/screenshot-maximized.webp",
+                "alt": "One subagent maximized inside the Claude Subagent Viewer panel, outlined in green because keys typed now go straight to it.",
+                "sha256": "3f05225349619516a002de24dc3a4115896c7dcb5d2bf032b32575f9e7d24566",
+                "width": 2560,
+                "height": 1600
+              },
+              {
+                "path": "plugins/claude-subagent-viewer/assets/screenshot-narrow.webp",
+                "alt": "A narrower sidebar: the four subagents redraw to fit their smaller panes.",
+                "sha256": "3dd3b8757224b63cbf42d4ae5a70561cc8da5792eb7907a3d69bbe493bd2f396",
+                "width": 2560,
+                "height": 1600
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
 }
