@@ -58,6 +58,8 @@ test('refuses bad pane ids and unknown keys', async () => {
   assert.deepEqual(await worker.request('tmux.send', { socket: 's; rm', pane: '%1', text: 'x', enter: true }), { ok: false })
   assert.deepEqual(await worker.request('tmux.key', { socket: 's', pane: '%1', key: 'C-c' }), { ok: false })
   assert.deepEqual(await worker.request('tmux.select', { socket: 's', pane: 'bad' }), { ok: false })
+  assert.deepEqual(await worker.request('tmux.close', { socket: 's; rm', pane: '%1' }), { ok: false })
+  assert.deepEqual(await worker.request('tmux.close', { socket: 's', pane: '1; kill' }), { ok: false })
   await worker.deactivate()
 })
 

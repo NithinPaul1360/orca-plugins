@@ -20,6 +20,8 @@ workspace you have open and shows every subagent live, without leaving Orca.
 - **Scroll** a pane with the wheel; Claude scrolls its own view.
 - **Paste an image** (Cmd+V on a pane or in the message bar): Claude attaches it as `[Image #1]`.
 - **Message a subagent** from the bar at the bottom.
+- **End a subagent** with the ✕ in its header: click once (it turns into "End?"), click again within
+  3 seconds. This kills its tmux pane, the same way Claude Code closes a teammate.
 - **Maximize** one subagent inside the panel with the expand button; press it again to go back.
 - **Lead** brings the chat that owns the team to the front.
 

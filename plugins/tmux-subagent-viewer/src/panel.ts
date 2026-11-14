@@ -29,6 +29,9 @@ button:disabled{opacity:.4;cursor:default}
 .name{color:var(--orca-foreground);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .model{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
 .head button{padding:0 5px;font-size:11px;line-height:16px}
+.head button.end{color:var(--orca-muted-foreground)}
+.head button.end:hover{color:#e5534b;border-color:#e5534b}
+.head button.end.arm{background:#e5534b;color:#fff;border-color:#e5534b}
 .head button.on{background:var(--orca-primary);color:var(--orca-primary-foreground);border-color:var(--orca-primary)}
 pre{user-select:none;outline:none;flex:1;min-height:0;margin:0;padding:4px 6px;color:var(--term-fg);font-family:ui-monospace,Menlo,monospace;line-height:1.25;white-space:pre;overflow:hidden;cursor:default}
 body.max .pane:not(.max){display:none}
@@ -371,6 +374,7 @@ function build(panes: PaneShot[]) {
   <div class="head" title="Click to message this subagent">
     <span class="dot"></span><span class="name"></span><span class="model"></span><span class="live-tag" title="Your keys go to this agent. Click outside the pane to stop.">typing</span>
     <button data-act="max" title="Maximize in this panel">⤢</button>
+    <button data-act="end" class="end" title="End this subagent">✕</button>
   </div>
   <pre tabindex="0"></pre>
 </div>`
@@ -379,7 +383,9 @@ function build(panes: PaneShot[]) {
   panesEl.querySelectorAll<HTMLDivElement>('.pane').forEach((el) => {
     const id = el.dataset.id!
     el.querySelector('.head')!.addEventListener('click', (e) => {
-      if ((e.target as HTMLElement).closest('button')?.dataset.act === 'max') return void toggleMax(id)
+      const act = (e.target as HTMLElement).closest('button')?.dataset.act
+      if (act === 'max') return void toggleMax(id)
+      if (act === 'end') return void endPane(el.querySelector<HTMLButtonElement>('[data-act="end"]')!, id)
       selectPane(id)
     })
     const pre = el.querySelector('pre')!
@@ -418,6 +424,30 @@ function build(panes: PaneShot[]) {
       { passive: false }
     )
   })
+}
+
+/** First click arms the button ("End?"), a second click within 3 s ends the subagent. */
+async function endPane(b: HTMLButtonElement, id: string) {
+  if (!b.classList.contains('arm')) {
+    b.classList.add('arm')
+    b.textContent = 'End?'
+    b.title = 'Click again to end this subagent'
+    setTimeout(() => {
+      b.classList.remove('arm')
+      b.textContent = '✕'
+      b.title = 'End this subagent'
+    }, 3000)
+    return
+  }
+  if (!selected) return
+  const who = nameOf(id)
+  const r = await orca.plugin.request('tmux.close', { socket: selected, pane: id }).catch(() => ({ ok: false }))
+  if (r.ok) {
+    if (maxPane === id) maxPane = null
+    if (selPane === id) setTarget(null)
+    toast(`Ended ${who}`)
+    setTimeout(() => void loadList(), 300)
+  } else toast(`Could not end ${who}`)
 }
 
 function markMax() {

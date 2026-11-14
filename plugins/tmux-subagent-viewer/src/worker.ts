@@ -130,6 +130,13 @@ export default function activate(orca: OrcaWorkerApi): void {
     return { ok: true }
   })
 
+  orca.panels.handle('tmux.close', async ({ socket, pane }) => {
+    if (!valid(socket, pane)) return { ok: false }
+    const ok = (await tmux(['-L', socket, 'kill-pane', '-t', pane])).ok
+    setTimeout(() => void pushNow(), 120)
+    return { ok }
+  })
+
   orca.panels.handle('tmux.fit', async ({ socket, gridCols, cols, rows, zoomed }) => {
     if (!SOCKET_RE.test(socket) || (zoomed && !PANE_RE.test(zoomed))) return { ok: false }
     const c = Math.max(20, Math.min(400, Math.floor(cols)))
