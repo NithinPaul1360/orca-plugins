@@ -21,7 +21,9 @@ workspace you have open and shows every subagent live, without leaving Orca.
 - **Paste an image** (Cmd+V on a pane or in the message bar): Claude attaches it as `[Image #1]`.
 - **Message a subagent** from the bar at the bottom.
 - **End a subagent** with the ✕ in its header: click once (it turns into "End?"), click again within
-  3 seconds. This kills its tmux pane, the same way Claude Code closes a teammate.
+  3 seconds. It does what you would do in the lead: selects that subagent in the lead's
+  teammate list and presses x ("x to stop", then "x to clear"), so it ends and leaves the list.
+  Nothing is typed into the chat. If the lead's input box holds your text, it does nothing.
 - **Maximize** one subagent inside the panel with the expand button; press it again to go back.
 - **Lead** brings the chat that owns the team to the front.
 
@@ -56,6 +58,7 @@ Tested on macOS with Orca 1.4.253 and Claude Code 2.1.322. Linux is expected to 
 
 - Runs its own background process (to call `tmux`, and the `orca` command for the Lead button).
 - Reads the terminal list and terminal text of the workspace you have open, to find the pinned `tmux -L … a` line.
+- Presses keys in a terminal only when you end a subagent: arrow keys and x in that team's lead, to pick its row and stop it.
 
 It sends nothing anywhere else.
 

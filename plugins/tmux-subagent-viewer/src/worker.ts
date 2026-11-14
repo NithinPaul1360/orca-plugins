@@ -3,7 +3,7 @@
 import type { OrcaWorkerApi } from 'orca/worker'
 import type { PinnedTmux } from './protocol'
 import { gridLayout } from './layout'
-import { capture, lastError, setupState, findSockets, keysArgs, KEYS, listPanes, orcaCli, PANE_RE, sendText, SOCKET_RE, tmux } from './tmux'
+import { capture, readLead, NAME_RE, lastError, setupState, findSockets, keysArgs, KEYS, listPanes, orcaCli, PANE_RE, sendText, SOCKET_RE, tmux } from './tmux'
 
 export default function activate(orca: OrcaWorkerApi): void {
   // The worker watches the chosen tmux itself (tmux calls cost Orca nothing) and posts a frame
@@ -130,11 +130,58 @@ export default function activate(orca: OrcaWorkerApi): void {
     return { ok: true }
   })
 
-  orca.panels.handle('tmux.close', async ({ socket, pane }) => {
-    if (!valid(socket, pane)) return { ok: false }
+  const killPane = async (socket: string, pane: string) => {
     const ok = (await tmux(['-L', socket, 'kill-pane', '-t', pane])).ok
     setTimeout(() => void pushNow(), 120)
-    return { ok }
+    return ok
+  }
+  const paneAlive = async (socket: string, pane: string) => !!(await listPanes(socket))?.some((p) => p.id === pane)
+
+  // Ends a subagent the way you would by hand in the lead: select its row in the lead's
+  // teammate list and press x ("x to stop"), then x again if the row offers "x to clear".
+  // Claude Code keeps that list in the lead's memory, so this is the only way it leaves it.
+  const DOWN = '\u001b[B'
+  const UP = '\u001b[A'
+  const wait = (ms: number) => new Promise((r) => setTimeout(r, ms))
+  const send = (terminalId: string, text: string) => orca.host.call('terminal.sendText', { terminalId, text })
+  const lead = async (terminalId: string) =>
+    readLead((await orca.host.call('terminal.read', { terminalId, maxLines: 60 })).lines)
+
+  orca.panels.handle('tmux.close', async ({ socket, pane, name, terminalId }) => {
+    if (!valid(socket, pane)) return { ok: false }
+    const who = (name ?? '').replace(/^@/, '')
+    if (!terminalId || !NAME_RE.test(who)) return { ok: false, reason: 'no-lead' as const }
+    try {
+      const before = await lead(terminalId)
+      if (before.draft) return { ok: false, reason: 'draft' as const }
+      const at = before.rows.indexOf(who)
+      if (at < 1) return { ok: false, reason: 'not-listed' as const }
+      for (let i = 0; i <= at; i++) {
+        await send(terminalId, DOWN)
+        await wait(120)
+      }
+      await wait(400)
+      const picked = await lead(terminalId)
+      if (picked.rows[picked.selected] !== who) {
+        // Not on the right row: back out without pressing anything.
+        for (let i = 0; i <= at + 1; i++) await send(terminalId, UP)
+        return { ok: false, reason: 'not-selected' as const }
+      }
+      await send(terminalId, 'x')
+      for (let tries = 0; tries < 6; tries++) {
+        await wait(500)
+        const now = await lead(terminalId)
+        if (!now.rows.includes(who)) break
+        if (now.rows[now.selected] === who && /x to clear/.test(now.hint)) {
+          await send(terminalId, 'x')
+        }
+      }
+      setTimeout(() => void pushNow(), 150)
+      return { ok: true }
+    } catch (e) {
+      orca.log(`close ${who}: ${String((e as Error)?.message ?? e)}`)
+      return { ok: false }
+    }
   })
 
   orca.panels.handle('tmux.fit', async ({ socket, gridCols, cols, rows, zoomed }) => {

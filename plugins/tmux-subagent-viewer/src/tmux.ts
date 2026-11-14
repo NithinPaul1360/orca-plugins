@@ -79,6 +79,34 @@ export async function capture(socket: string): Promise<{ alive: boolean; panes: 
 }
 
 export const SOCKET_RE = /^[A-Za-z0-9._-]+$/
+/** A Claude Code teammate name, safe to put in a sentence to the lead. */
+export const NAME_RE = /^[A-Za-z0-9._-]{1,64}$/
+
+/** What the lead's screen shows: whether its input box holds your text, its teammate rows
+ *  (main first, as Claude Code lists them) and which row is selected. */
+export function readLead(lines: string[]): { draft: boolean; rows: string[]; selected: number; hint: string } {
+  let draft = true
+  let input = -1
+  for (let i = lines.length - 1; i > 0; i--) {
+    if (/^\s*─{3,}/.test(lines[i - 1]) && /^❯/.test(lines[i])) {
+      input = i
+      draft = lines[i].slice(1).trim().length > 0
+      break
+    }
+  }
+  const rows: string[] = []
+  let selected = -1
+  let hint = ''
+  for (let i = Math.max(0, input + 1); i < lines.length; i++) {
+    const m = /^(❯)?\s+\S\s+(\S+)(?:\s{2,}|\s*$)/.exec(lines[i])
+    if (/to (stop|clear|view|select)/.test(lines[i])) hint = lines[i].trim()
+    if (rows.length === 0 && !(m && m[2] === 'main')) continue
+    if (!m) break
+    if (m[1]) selected = rows.length
+    rows.push(m[2])
+  }
+  return { draft, rows, selected, hint }
+}
 export const PANE_RE = /^%\d+$/
 export const KEYS = ['Escape', 'Up', 'Down', 'Enter', 'BTab', 'Tab']
 

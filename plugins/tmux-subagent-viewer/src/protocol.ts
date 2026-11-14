@@ -43,8 +43,12 @@ declare module 'orca' {
     'tmux.wheel': { input: { socket: string; pane: string; up: boolean; col: number; row: number; count: number }; output: { ok: boolean } }
     /** Zooms one pane to the whole tmux window (on) or puts the layout back (off). */
     'tmux.zoom': { input: { socket: string; pane: string; on: boolean }; output: { ok: boolean } }
-    /** Ends one subagent the way Claude Code does: kills its tmux pane. */
-    'tmux.close': { input: { socket: string; pane: string }; output: { ok: boolean } }
+    /** Ends one subagent everywhere: in the lead's teammate list, selects its row and presses x
+     *  (and x again to clear), as you would by hand. Types no message. */
+    'tmux.close': {
+      input: { socket: string; pane: string; name?: string; terminalId?: string }
+      output: { ok: boolean; reason?: 'no-lead' | 'draft' | 'not-listed' | 'not-selected' }
+    }
   }
   interface PluginPanelEvents {
     /** The watched tmux's screen changed. */

@@ -1,6 +1,6 @@
 import { assert, mockHost, mountWorker, test } from 'orca/testing'
 import * as main from './worker'
-import { findSockets, parsePanes, utf8 } from './tmux'
+import { findSockets, parsePanes, readLead, utf8 } from './tmux'
 import { ansiToHtml } from './ansi'
 
 test('finds the pinned tmux command in chat text', () => {
@@ -110,4 +110,15 @@ test('keeps tmux in UTF-8 even when Orca starts the worker without a locale', ()
   assert.equal(utf8('C.utf8'), 'C.utf8')
   assert.equal(utf8('C'), undefined)
   assert.equal(utf8(undefined), undefined)
+})
+
+test('reads the lead input box and teammate list', () => {
+  const top = ['⏺ done', '─── View teammates: `tmux -L s a` ─']
+  const foot = ['───', '  ◆ Haiku 5.5 [NS] ↳ hq   │  id', '  ⏵⏵ bypass permissions on']
+  const idle = readLead([...top, '❯ ', ...foot, '  ⏺ main', '  ◯ dummy2  Spawn dummy2 teammate     7s', '  ◯ dummy3  Spawn   7s'])
+  assert.deepEqual([idle.draft, idle.rows, idle.selected], [false, ['main', 'dummy2', 'dummy3'], -1])
+  assert.equal(readLead([...top, '❯ half a thought', ...foot, '  ⏺ main']).draft, true)
+  const picked = readLead([...top, '❯', ...foot.slice(0, 2), '  Enter to view · x to clear', '  ⏺ main', '❯ ◯ dummy2  Spawn   7s'])
+  assert.deepEqual([picked.selected, picked.hint], [1, 'Enter to view · x to clear'])
+  assert.equal(readLead(['no prompt on screen']).draft, true)
 })

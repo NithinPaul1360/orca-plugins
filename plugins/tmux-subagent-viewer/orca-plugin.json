@@ -3,7 +3,7 @@
   "manifestVersion": 2,
   "id": "tmux-subagent-viewer",
   "name": "Tmux Subagent Viewer",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "See, message and drive your Claude Code subagents from Orca's sidebar. macOS and Linux; needs tmux and Claude Code's tmux teammate mode.",
   "author": {
     "name": "Nithin Paul",
@@ -43,6 +43,9 @@
     },
     {
       "kind": "terminal:read"
+    },
+    {
+      "kind": "terminal:send"
     }
   ],
   "contributes": {

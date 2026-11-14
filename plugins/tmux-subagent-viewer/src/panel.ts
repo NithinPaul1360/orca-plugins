@@ -441,13 +441,22 @@ async function endPane(b: HTMLButtonElement, id: string) {
   }
   if (!selected) return
   const who = nameOf(id)
-  const r = await orca.plugin.request('tmux.close', { socket: selected, pane: id }).catch(() => ({ ok: false }))
+  const r: { ok: boolean; reason?: string } = await orca.plugin
+    .request('tmux.close', { socket: selected, pane: id, name: who, terminalId: current()?.terminalId })
+    .catch(() => ({ ok: false }))
   if (r.ok) {
     if (maxPane === id) maxPane = null
     if (selPane === id) setTarget(null)
     toast(`Ended ${who}`)
     setTimeout(() => void loadList(), 300)
-  } else toast(`Could not end ${who}`)
+  } else
+    toast(
+      r.reason === 'draft'
+        ? `Not ended: the lead's input box has your text. Clear it, then try again.`
+        : r.reason === 'not-listed' || r.reason === 'not-selected'
+          ? `Not ended: could not find ${who} in the lead's list.`
+          : `Could not end ${who}`
+    )
 }
 
 function markMax() {
