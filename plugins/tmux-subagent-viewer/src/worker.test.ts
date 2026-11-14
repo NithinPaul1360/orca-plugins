@@ -1,6 +1,6 @@
 import { assert, mockHost, mountWorker, test } from 'orca/testing'
 import * as main from './worker'
-import { findSockets, parsePanes } from './tmux'
+import { findSockets, parsePanes, utf8 } from './tmux'
 import { ansiToHtml } from './ansi'
 
 test('finds the pinned tmux command in chat text', () => {
@@ -100,4 +100,12 @@ test('live keys: one tmux call, in order, unsafe names refused', () => {
 test('mouse steps: only SGR reports pass', () => {
   assert.ok(keysArgs('s', '%1', [{ mouse: '\u001b[<0;5;7M\u001b[<0;5;7m' }]))
   assert.equal(keysArgs('s', '%1', [{ mouse: '\u001b]52;c;evil\u0007' }]), null)
+})
+
+test('keeps tmux in UTF-8 even when Orca starts the worker without a locale', () => {
+  // Without it tmux prints our \u001f field separator as '_' and every team looks empty.
+  assert.equal(utf8('en_US.UTF-8'), 'en_US.UTF-8')
+  assert.equal(utf8('C.utf8'), 'C.utf8')
+  assert.equal(utf8('C'), undefined)
+  assert.equal(utf8(undefined), undefined)
 })

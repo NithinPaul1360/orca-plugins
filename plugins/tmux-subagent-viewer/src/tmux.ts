@@ -22,17 +22,29 @@ export function findSockets(lines: string[]): string[] {
 // Known install places first (Orca's worker may not have the shell's PATH), then PATH.
 const TMUX = ['/opt/homebrew/bin/tmux', '/usr/local/bin/tmux', '/usr/bin/tmux', '/bin/tmux', '/snap/bin/tmux'].find((p) => existsSync(p)) ?? 'tmux'
 
-/** Whether this machine can run Tmux Peek: tmux has no native Windows build. */
+/** Whether this machine can run Tmux Subagent Viewer: tmux has no native Windows build. */
 export async function setupState(): Promise<'ok' | 'windows' | 'no-tmux'> {
   if (process.platform === 'win32') return 'windows'
   return (await tmux(['-V'])).ok ? 'ok' : 'no-tmux'
 }
 
+const LOCALE = utf8(process.env.LC_ALL) ?? utf8(process.env.LC_CTYPE) ?? utf8(process.env.LANG) ?? (process.platform === 'darwin' ? 'en_US.UTF-8' : 'C.UTF-8')
+const UTF8_ENV = { ...process.env, LC_ALL: LOCALE, LC_CTYPE: LOCALE }
+export function utf8(v?: string) {
+  return v && /utf-?8/i.test(v) ? v : undefined
+}
+
+/** The last tmux failure, for the worker log. */
+export let lastError = ''
+
 export function tmux(args: string[], timeoutMs = 2000): Promise<{ ok: boolean; out: string }> {
   return new Promise((resolve) => {
-    execFile(TMUX, args, { timeout: timeoutMs, maxBuffer: 4 * 1024 * 1024 }, (err, stdout) =>
+    // -u and a UTF-8 locale: Orca starts workers without LANG, and tmux then turns every
+    // non-ASCII byte (our field separator, ✳, box lines) into '_'.
+    execFile(TMUX, ['-u', ...args], { timeout: timeoutMs, maxBuffer: 4 * 1024 * 1024, env: UTF8_ENV }, (err, stdout, stderr) => {
+      if (err) lastError = `${args.slice(0, 3).join(' ')}: ${String(stderr || (err as Error).message).trim().slice(0, 300)}`
       resolve({ ok: !err, out: String(stdout ?? '') })
-    )
+    })
   })
 }
 

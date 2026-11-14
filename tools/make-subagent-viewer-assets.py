@@ -1,9 +1,9 @@
 import os, sys
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
-# usage: tools/make-tmux-peek-assets.py <dir with full-grid.png, full-max.png, full-narrow.png>
-SRC = sys.argv[1] if len(sys.argv) > 1 else sys.exit(__doc__ or 'usage: make-tmux-peek-assets.py <captures-dir>')
-OUT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'plugins', 'tmux-peek', 'assets')
+# usage: tools/make-subagent-viewer-assets.py <dir with full-grid.png, full-max.png, full-narrow.png>
+SRC = sys.argv[1] if len(sys.argv) > 1 else sys.exit(__doc__ or 'usage: make-subagent-viewer-assets.py <captures-dir>')
+OUT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'plugins', 'tmux-subagent-viewer', 'assets')
 SF = next((f for f in ['/System/Library/Fonts/SFNS.ttf', '/usr/share/fonts/truetype/inter/Inter.ttf'] if os.path.exists(f)), None)
 CROP = (442, 0, None, 1852)      # drop the project list (left) and the status bar (bottom)
 PANEL = (1588, 80, 3024, 1852)   # the right sidebar, for the cover
@@ -63,11 +63,11 @@ def screenshot(name, title, sub, out):
     print(out, os.path.getsize(f'{OUT}/{out}')//1024, 'KB')
 
 screenshot('grid', 'Your agent team, live in the sidebar',
-           'Every teammate in its own pane, sized to fit. Colours, diffs and spinners as Claude draws them.', 'screenshot-team.webp')
-screenshot('max', 'Focus on one teammate',
+           'Every subagent in its own pane, sized to fit. Colours, diffs and spinners as Claude draws them.', 'screenshot-team.webp')
+screenshot('max', 'Focus on one subagent',
            'The expand button maximizes a pane inside the panel. Click it and type: keys, arrows, Esc, Ctrl-C and paste go straight to Claude.', 'screenshot-maximized.webp')
 screenshot('narrow', 'Fits any sidebar width',
-           'Narrow the sidebar and each agent redraws to its pane. Message any teammate from the bar at the bottom.', 'screenshot-narrow.webp')
+           'Narrow the sidebar and each agent redraws to its pane. Message any subagent from the bar at the bottom.', 'screenshot-narrow.webp')
 
 # ---- cover 1600x1000 ----
 W, H = 1600, 1000
@@ -80,17 +80,18 @@ pw = int(panel.size[0] * ph / panel.size[1])
 panel = panel.resize((pw, ph), Image.LANCZOS)
 px = W - pw - 70
 shadowed(c, panel, (px, 60), r=22, blur=34)
-d.text((86, 300), 'Tmux Peek', font=font(92, 700), fill=(244, 247, 250))
-lines = ['Watch, message and drive', 'your Claude Code agent', 'teammates from Orca’s sidebar.']
+d.text((86, 250), 'Tmux Subagent', font=font(84, 700), fill=(244, 247, 250))
+d.text((86, 345), 'Viewer', font=font(84, 700), fill=(244, 247, 250))
+lines = ['See, message and drive', 'your Claude Code subagents', 'from Orca’s sidebar.']
 for i, t in enumerate(lines):
-    d.text((90, 430 + i*50), t, font=font(36, 400), fill=(160, 176, 194))
+    d.text((90, 470 + i*50), t, font=font(36, 400), fill=(160, 176, 194))
 chips = ['live panes', 'type & click', 'image paste']
 x = 90
 for t in chips:
     f = font(24, 590)
     w = d.textlength(t, font=f)
-    d.rounded_rectangle((x, 620, x + w + 32, 662), 21, fill=(24, 74, 58), outline=(63, 185, 80))
-    d.text((x + 16, 628), t, font=f, fill=(220, 252, 231))
+    d.rounded_rectangle((x, 660, x + w + 32, 702), 21, fill=(24, 74, 58), outline=(63, 185, 80))
+    d.text((x + 16, 668), t, font=f, fill=(220, 252, 231))
     x += w + 46
 c.convert('RGB').save(f'{OUT}/cover.webp', quality=90, method=6)
 print('cover', os.path.getsize(f'{OUT}/cover.webp')//1024, 'KB')

@@ -3,7 +3,7 @@ declare module 'node:child_process' {
   export function execFile(
     file: string,
     args: string[],
-    options: { timeout?: number; maxBuffer?: number },
+    options: { timeout?: number; maxBuffer?: number; env?: Record<string, string | undefined> },
     cb: (err: Error | null, stdout: string, stderr: string) => void
   ): unknown
 }

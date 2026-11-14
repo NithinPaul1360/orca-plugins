@@ -3,7 +3,7 @@
 import type { OrcaWorkerApi } from 'orca/worker'
 import type { PinnedTmux } from './protocol'
 import { gridLayout } from './layout'
-import { capture, setupState, findSockets, keysArgs, KEYS, listPanes, orcaCli, PANE_RE, sendText, SOCKET_RE, tmux } from './tmux'
+import { capture, lastError, setupState, findSockets, keysArgs, KEYS, listPanes, orcaCli, PANE_RE, sendText, SOCKET_RE, tmux } from './tmux'
 
 export default function activate(orca: OrcaWorkerApi): void {
   // The worker watches the chosen tmux itself (tmux calls cost Orca nothing) and posts a frame
@@ -80,7 +80,9 @@ export default function activate(orca: OrcaWorkerApi): void {
 
   orca.panels.handle('tmux.capture', async ({ socket }) => {
     if (!SOCKET_RE.test(socket)) return { alive: false, panes: [] }
-    return capture(socket)
+    const shot = await capture(socket)
+    if (!shot.alive) orca.log(`capture ${socket}: ${lastError}`)
+    return shot
   })
 
   const valid = (socket: string, pane: string) => SOCKET_RE.test(socket) && PANE_RE.test(pane)

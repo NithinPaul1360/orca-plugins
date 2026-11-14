@@ -1,4 +1,4 @@
-// Right-sidebar panel: pick a tmux pinned in this workspace's chats and watch every teammate
+// Right-sidebar panel: pick a tmux pinned in this workspace's chats and watch every subagent
 // live in a grid that fits the panel. Click a pane to aim the message bar at it; ⤢ maximizes it.
 import { ansiToHtml } from './ansi'
 import type { PaneShot, PinnedTmux } from './protocol'
@@ -51,8 +51,8 @@ document.body.innerHTML = `
 <div id="top"><select id="pick" aria-label="Pinned tmux"></select><button id="lead" title="Bring the lead chat to the front">Lead</button><button id="refresh" class="ghost" title="Look again">↻</button></div>
 <div id="panes"></div>
 <div id="bar" class="off">
-  <div class="to">To <b id="to">click a teammate</b></div>
-  <textarea id="box" rows="1" placeholder="Click a teammate above to message it"></textarea>
+  <div class="to">To <b id="to">click a subagent</b></div>
+  <textarea id="box" rows="1" placeholder="Click a subagent above to message it"></textarea>
   <div class="keys"><span class="hint">Enter sends · or click a pane and type in it</span>
     <button data-key="Escape" title="Esc: interrupt or close a menu">Esc</button>
     <button data-key="Up" title="Up arrow">↑</button>
@@ -97,7 +97,7 @@ function empty(title: string, text: string) {
 
 const current = () => items.find((i) => i.socket === selected)
 const paneEl = (id: string) => panesEl.querySelector<HTMLDivElement>(`.pane[data-id="${id}"]`)
-const nameOf = (id: string) => paneEl(id)?.querySelector('.name')?.textContent ?? 'teammate'
+const nameOf = (id: string) => paneEl(id)?.querySelector('.name')?.textContent ?? 'subagent'
 
 async function loadList() {
   let res: { workspace: string | null; items: PinnedTmux[]; setup: 'ok' | 'windows' | 'no-tmux' }
@@ -114,7 +114,7 @@ async function loadList() {
     selPane = null
   }
   const label = (i: PinnedTmux) =>
-    `${i.terminalTitle} · ${i.alive ? `${i.paneCount} teammate${i.paneCount === 1 ? '' : 's'}` : 'ended'}`
+    `${i.terminalTitle} · ${i.alive ? `${i.paneCount} subagent${i.paneCount === 1 ? '' : 's'}` : 'ended'}`
   pick.innerHTML = items.length
     ? items.map((i) => `<option value="${i.socket}" ${i.socket === selected ? 'selected' : ''}>${esc(label(i))}</option>`).join('')
     : `<option>No pinned tmux in ${esc(res.workspace ?? 'this workspace')}</option>`
@@ -123,15 +123,15 @@ async function loadList() {
   $<HTMLButtonElement>('lead').disabled = !current()
   if (res.setup === 'windows') {
     pick.innerHTML = '<option>Not available on Windows</option>'
-    return empty('Tmux Peek needs tmux', 'Claude Code shows agent teammates in tmux, which does not run on Windows. Use Orca on macOS or Linux.')
+    return empty('Tmux Subagent Viewer needs tmux', 'Claude Code shows subagents in tmux, which does not run on Windows. Use Orca on macOS or Linux.')
   }
   if (res.setup === 'no-tmux') {
     pick.innerHTML = '<option>tmux not found</option>'
-    return empty('Install tmux first', 'Tmux Peek could not find <code>tmux</code>. Install it (macOS: <code>brew install tmux</code>), then press ↻.')
+    return empty('Install tmux first', 'Tmux Subagent Viewer could not find <code>tmux</code>. Install it (macOS: <code>brew install tmux</code>), then press ↻.')
   }
   if (!items.length)
     empty(
-      'No teammates here',
+      'No subagents here',
       'Start an agent team in a Claude Code chat in this workspace. Teams show here when Claude Code runs them in tmux: set <code>"teammateMode": "tmux"</code> in <code>~/.claude/settings.json</code>. The chat then pins <code>tmux -L … a</code> and it appears in the list above.'
     )
 }
@@ -188,8 +188,8 @@ function setTarget(id: string | null) {
   selPane = id
   panesEl.querySelectorAll<HTMLElement>('.pane').forEach((el) => el.classList.toggle('sel', el.dataset.id === id))
   bar.classList.toggle('off', !id)
-  $('to').textContent = id ? nameOf(id) : 'click a teammate'
-  box.placeholder = id ? `Message ${nameOf(id)}…` : 'Click a teammate above to message it'
+  $('to').textContent = id ? nameOf(id) : 'click a subagent'
+  box.placeholder = id ? `Message ${nameOf(id)}…` : 'Click a subagent above to message it'
 }
 
 function selectPane(id: string, focusBox = false) {
@@ -368,7 +368,7 @@ function build(panes: PaneShot[]) {
   panesEl.innerHTML = panes
     .map(
       (p) => `<div class="pane" data-id="${p.id}">
-  <div class="head" title="Click to message this teammate">
+  <div class="head" title="Click to message this subagent">
     <span class="dot"></span><span class="name"></span><span class="model"></span><span class="live-tag" title="Your keys go to this agent. Click outside the pane to stop.">typing</span>
     <button data-act="max" title="Maximize in this panel">⤢</button>
   </div>
@@ -428,7 +428,7 @@ function markMax() {
     const b = el.querySelector<HTMLButtonElement>('[data-act="max"]')!
     b.classList.toggle('on', on)
     b.textContent = on ? '⤡' : '⤢'
-    b.title = on ? 'Back to all teammates' : 'Maximize in this panel'
+    b.title = on ? 'Back to all subagents' : 'Maximize in this panel'
   })
 }
 
@@ -500,7 +500,10 @@ orca.plugin.on('tmux.frame', (f) => {
   if (f.socket !== selected) return
   const item = current()
   if (f.alive && f.panes.length) draw(f.panes)
-  else if (item) ended(item)
+  else if (f.alive) {
+    paneCount = 0
+    empty('No subagents open', 'This team’s tmux is running, but no subagent pane is open right now.')
+  } else if (item) ended(item)
 })
 
 function unzoom() {
@@ -532,7 +535,7 @@ new ResizeObserver(() => layout()).observe(panesEl)
 // Closing or reloading the panel while maximized puts the tmux layout back.
 window.addEventListener('pagehide', unzoom)
 
-empty('Looking for teammates…', 'Reading the chats in this workspace.')
+empty('Looking for subagents…', 'Reading the chats in this workspace.')
 void loadList().then(watch)
 setInterval(watch, 5000) // keep-alive for the worker's watch
 setInterval(() => void loadList(), 20000)
